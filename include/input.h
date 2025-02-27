@@ -25,6 +25,8 @@ typedef enum {
     UP_BACK
 } GameDirection;
 
+static const GameDirection kbdPattern[4] = {BACK, NEUTRAL, BACK, DOWN_BACK};
+
 static const char *DirectionNames[11] = {
     [0] = "UNKNOWN",
     [1] = "DISCONNECTED",

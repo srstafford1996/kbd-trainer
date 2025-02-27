@@ -1,2 +1,5 @@
 .vscode
 build
+bin
+*.exe
+*.pdb
