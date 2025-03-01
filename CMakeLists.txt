@@ -16,6 +16,7 @@ find_package(SDL2_IMAGE REQUIRED HINTS ${SDL2_IMAGE_DIR})
 
 set(HEADER_FILES
     include/input.h
+    include/render.h
 )
 
 add_definitions(-D_AMD64_)
@@ -24,6 +25,7 @@ add_definitions(-D_AMD64_)
 set(SOURCE_FILES
     src/main.c
     src/input.c
+    src/render.c
 )
 
 include_directories(include)
