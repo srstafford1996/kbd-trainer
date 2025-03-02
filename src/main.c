@@ -9,6 +9,7 @@
 
 #include "render.h"
 #include "input.h"
+#include "game.h"
 
 const int FPS = 60;
 
@@ -26,6 +27,7 @@ int main()
     SDL_Event ev;    
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
+    DWORD controllerIndex = GetControllerIndex();
     
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
@@ -34,7 +36,7 @@ int main()
         return 1;
     }
     
-    IMG_Init(0);
+    IMG_Init(IMG_INIT_PNG);
     
     window = SDL_CreateWindow("KBD Trainer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, INITIAL_VIEW_WIDTH, INITIAL_VIEW_HEIGHT, SDL_WINDOW_SHOWN);
     if (window == NULL)
@@ -54,8 +56,9 @@ int main()
     
     if (Init_Textures(renderer))
         printf("Texture load success!\n");
-    
-    
+        
+    Init_Game();
+
     while (isRunning)
     {
         prevFrame = frameStart;
@@ -67,9 +70,9 @@ int main()
                 isRunning = false;
         }
 
-        SDL_RenderClear(renderer);
-        Render_KBD_Sequence(renderer);
-        SDL_RenderPresent(renderer);
+        
+        Update( GetInput(controllerIndex) );
+        Render(renderer);
 
         // How long it took to execute the functions
         frameTime = SDL_GetTicks64() - frameStart;

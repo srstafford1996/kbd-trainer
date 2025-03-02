@@ -1,16 +1,17 @@
 #pragma once
 
 #include <SDL.h>
+
 #include "input.h"
+#include "game.h"
 
 #define ICON_WIDTH 70
 #define ICON_HEIGHT 70
-#define KBD_INPUT_COUNT 11
 
 #define INITIAL_VIEW_WIDTH ICON_WIDTH * KBD_INPUT_COUNT
 #define INITIAL_VIEW_HEIGHT ICON_HEIGHT * 2
 
-static const char * assetLocations[9] = {
+static const char * _directionAssets[9] = {
     [0] = "assets/n.bmp",
     [1] = "assets/u.bmp",
     [2] = "assets/uf.bmp",
@@ -22,5 +23,7 @@ static const char * assetLocations[9] = {
     [8] = "assets/ub.bmp"
 };
 
+static const char * _playerAsset = "assets/ez1.png";
+
 bool Init_Textures(SDL_Renderer *);
-bool Render_KBD_Sequence(SDL_Renderer *);
+bool Render(SDL_Renderer *);
