@@ -8,13 +8,13 @@ project(KBDTrainer VERSION 1.0)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-set(SDL2_DIR "C:\\SDL2")
-set(SDL2_IMAGE_DIR "C:\\SDL2_image")
-set(SDL2_TTF_DIR "C:\\SDL2_ttf")
+set(SDL3_DIR "C:\\SDL\\SDL3")
+set(SDL3_IMAGE_DIR "C:\\SDL\\SDL3_image")
+set(SDL3_TTF_DIR "C:\\SDL\\SDL3_ttf")
 
-find_package(SDL2 REQUIRED HINTS ${SDL2_DIR})
-find_package(SDL2_IMAGE REQUIRED HINTS ${SDL2_IMAGE_DIR})
-find_package(SDL2_TTF REQUIRED HINTS ${SDL2_TTF_DIR})
+find_package(SDL3 REQUIRED HINTS ${SDL3_DIR})
+find_package(SDL3_IMAGE REQUIRED HINTS ${SDL3_IMAGE_DIR})
+find_package(SDL3_TTF REQUIRED HINTS ${SDL3_TTF_DIR})
 
 set(HEADER_FILES
     include/input.h
@@ -41,7 +41,7 @@ endif()
 
 # Create executable
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries(${PROJECT_NAME} SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf) 
+target_link_libraries(${PROJECT_NAME} SDL3::SDL3 SDL3_image::SDL3_image SDL3_ttf::SDL3_ttf) 
 
 # Build the exe in the base project folder
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -51,23 +51,23 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 # Get DLL locations
-get_target_property(SDL2_DLL_PATH SDL2::SDL2 IMPORTED_LOCATION)
-get_target_property(SDL2_IMAGE_DLL_PATH SDL2_image::SDL2_image IMPORTED_LOCATION)
-get_target_property(SDL2_TTF_DLL_PATH SDL2_ttf::SDL2_ttf IMPORTED_LOCATION)
+get_target_property(SDL3_DLL_PATH SDL3::SDL3 IMPORTED_LOCATION)
+get_target_property(SDL3_IMAGE_DLL_PATH SDL3_image::SDL3_image IMPORTED_LOCATION)
+get_target_property(SDL3_TTF_DLL_PATH SDL3_ttf::SDL3_ttf IMPORTED_LOCATION)
 
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${SDL2_DLL_PATH}"
+        "${SDL3_DLL_PATH}"
         "${CMAKE_SOURCE_DIR}/bin"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${SDL2_IMAGE_DLL_PATH}"
+        "${SDL3_IMAGE_DLL_PATH}"
         "${CMAKE_SOURCE_DIR}/bin"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${SDL2_TTF_DLL_PATH}"
+        "${SDL3_TTF_DLL_PATH}"
         "${CMAKE_SOURCE_DIR}/bin"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/assets"
         "${CMAKE_SOURCE_DIR}/bin/assets"
-    COMMENT "Copying SDL2 and SDL2_image DLLs to output directory"
+    COMMENT "Copying SDL3 and SDL3_image DLLs to output directory"
 )
