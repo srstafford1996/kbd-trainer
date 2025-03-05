@@ -5,6 +5,7 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 
 
 #include "render.h"
@@ -37,6 +38,7 @@ int main()
     }
     
     IMG_Init(IMG_INIT_PNG);
+    TTF_Init();
     
     window = SDL_CreateWindow("KBD Trainer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, INITIAL_VIEW_WIDTH, INITIAL_VIEW_HEIGHT, SDL_WINDOW_SHOWN);
     if (window == NULL)

@@ -10,9 +10,11 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 set(SDL2_DIR "C:\\SDL2")
 set(SDL2_IMAGE_DIR "C:\\SDL2_image")
+set(SDL2_TTF_DIR "C:\\SDL2_ttf")
 
 find_package(SDL2 REQUIRED HINTS ${SDL2_DIR})
 find_package(SDL2_IMAGE REQUIRED HINTS ${SDL2_IMAGE_DIR})
+find_package(SDL2_TTF REQUIRED HINTS ${SDL2_TTF_DIR})
 
 set(HEADER_FILES
     include/input.h
@@ -39,7 +41,7 @@ endif()
 
 # Create executable
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries(${PROJECT_NAME} SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image) 
+target_link_libraries(${PROJECT_NAME} SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf) 
 
 # Build the exe in the base project folder
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -51,6 +53,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 # Get DLL locations
 get_target_property(SDL2_DLL_PATH SDL2::SDL2 IMPORTED_LOCATION)
 get_target_property(SDL2_IMAGE_DLL_PATH SDL2_image::SDL2_image IMPORTED_LOCATION)
+get_target_property(SDL2_TTF_DLL_PATH SDL2_ttf::SDL2_ttf IMPORTED_LOCATION)
+
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -58,6 +62,9 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         "${CMAKE_SOURCE_DIR}/bin"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${SDL2_IMAGE_DLL_PATH}"
+        "${CMAKE_SOURCE_DIR}/bin"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${SDL2_TTF_DLL_PATH}"
         "${CMAKE_SOURCE_DIR}/bin"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/assets"

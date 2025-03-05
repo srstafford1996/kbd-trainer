@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <stdint.h>
 
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <SDL_image.h>
 
 #include "render.h"
@@ -11,8 +13,17 @@
 int ViewWidth = INITIAL_VIEW_WIDTH; 
 int ViewHeight = INITIAL_VIEW_HEIGHT; 
 
-SDL_Texture *player_texture;
 SDL_Texture *direction_textures[9];
+
+
+//Score stuff
+uint64_t curr_score = -1;
+uint64_t curr_highscore = -2;
+
+TTF_Font *score_font;
+SDL_Texture *score_texture;
+SDL_Texture *highscore_texture;
+
 
 // Initialize Textures
 bool Init_Textures(SDL_Renderer *renderer)
@@ -24,68 +35,85 @@ bool Init_Textures(SDL_Renderer *renderer)
         curr = IMG_LoadTexture(renderer, _directionAssets[i]);    
         if (curr == NULL)
         {
-            printf("Error loading asset(%s): %s\n", _directionAssets[i], SDL_GetError());
+            printf("Error loading asset(%s): %s\n", _directionAssets[i], IMG_GetError());
             return false;
         }
 
         direction_textures[i] = curr;
     }
 
-    // Load player texture
-    player_texture = IMG_LoadTexture(renderer, _playerAsset);
+    // Load font
+    highscore_texture = NULL;
+    score_texture = NULL;
+
+    score_font = TTF_OpenFont(_fontAsset, 24);
+    if (score_font == NULL)
     {
-        printf("Error loading asset(%s): %s\n", _playerAsset, SDL_GetError());
+        printf("Error loading font asset(%s): %s\n", _fontAsset, TTF_GetError());
         return false;
     }
 
     return true;
 }
 
-// Generate KBD Rect Sequence 
-bool Render_KBD_Sequence(SDL_Renderer *renderer)
+void Update_Score(SDL_Renderer *renderer)
 {
-    // Rect Initizliation: x, y, width, height
-    SDL_Rect destRect = {ViewWidth, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT};
+    char scoreText[32];
+    SDL_Color scoreColor = {255, 255, 255};
 
-    for(int i = 0; i < KBD_INPUT_COUNT; i++)
-    {
-        destRect.x -= ICON_WIDTH;
-
-        // KBD Input at i % 4 represents the texture we want
-        SDL_Texture *texture = direction_textures[ (int) kbdPattern[i % 4] ];
-        SDL_RenderCopy(renderer, texture, NULL, &destRect);
-    }
-
-    return true;
-}
-
-bool Render_Player(SDL_Renderer *renderer)
-{
-    SDL_Rect destRect = {ViewWidth, 0, ICON_WIDTH, ICON_HEIGHT};
-    SDL_Texture *texture = NULL;
-
-    // Render the successful inputs
-    for(int i = 0; i < gamestate.player_pos; i++)
-    {
-        destRect.x -= ICON_WIDTH;
-        texture = direction_textures[ (int) kbdPattern[i % 4] ];
-        SDL_RenderCopy(renderer, texture, NULL, &destRect);
-    }
+    if (gamestate.score == curr_score)
+        return;
+        
+    // Update score and destroy old texture
+    curr_score = gamestate.score;
+    if (score_texture != NULL)
+        SDL_DestroyTexture(score_texture);
     
-    // Then the actual player
-    destRect.x -= ICON_WIDTH;
-    texture = player_texture;
-    SDL_RenderCopy(renderer, texture, NULL, &destRect);
 
-    return true;
+    snprintf(scoreText, 32, "%06lld\0", gamestate.score);
+    SDL_Surface *scoreSurface = TTF_RenderText_Solid(score_font, scoreText, scoreColor);
+    
+    score_texture = SDL_CreateTextureFromSurface(renderer, scoreSurface);
+    SDL_FreeSurface(scoreSurface);
+
+    if (gamestate.highscore == curr_highscore)
+        return;
+        
+    // Update high score and destroy old texture
+    curr_highscore = gamestate.score;
+    if (highscore_texture != NULL)
+        SDL_DestroyTexture(highscore_texture);
+
+    snprintf(scoreText, 32, "%06lld\0", gamestate.highscore);
+    scoreSurface = TTF_RenderText_Solid(score_font, scoreText, scoreColor);
+
+    highscore_texture = SDL_CreateTextureFromSurface(renderer, scoreSurface);
+    SDL_FreeSurface(scoreSurface);
 }
+
 
 bool Render(SDL_Renderer *renderer) 
 {
     SDL_RenderClear(renderer);
 
-    Render_Player(renderer);
-    Render_KBD_Sequence(renderer);
-    
+    // Render next input
+    SDL_Rect destRect = {SIDE_PADDING, ICON_HEIGHT / 2, ICON_WIDTH, ICON_HEIGHT};
+    SDL_RenderCopy(renderer, direction_textures[ kbdPattern[ gamestate.player_pos % 4 ] ], NULL, &destRect);
+
+    // Render score and high score panel
+    Update_Score(renderer);
+
+    destRect.x = ICON_WIDTH + SIDE_PADDING*2;
+    destRect.y = 0; 
+    destRect.w = SCORE_COUNTER_WIDTH;
+    destRect.h = SCORE_COUNTER_HEIGHT;
+
+    SDL_RenderCopy(renderer, score_texture, NULL, &destRect);
+
+    destRect.y = SCORE_COUNTER_HEIGHT;
+    SDL_RenderCopy(renderer, highscore_texture, NULL, &destRect);
+
     SDL_RenderPresent(renderer);
+
+    return true;
 }
