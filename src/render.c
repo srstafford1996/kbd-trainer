@@ -26,7 +26,7 @@ SDL_Texture *highscore_texture;
 
 
 // Initialize Textures
-bool Init_Textures(SDL_Renderer *renderer)
+bool InitTextures(SDL_Renderer *renderer)
 {
     SDL_Texture *curr = NULL;
 
@@ -56,7 +56,7 @@ bool Init_Textures(SDL_Renderer *renderer)
     return true;
 }
 
-void Update_Score(SDL_Renderer *renderer)
+void UpdateScore(SDL_Renderer *renderer)
 {
     char scoreText[32];
     SDL_Color scoreColor = {255, 255, 255};
@@ -98,10 +98,10 @@ bool Render(SDL_Renderer *renderer)
 
     // Render next input
     SDL_FRect destRect = {SIDE_PADDING, ICON_HEIGHT / 2, ICON_WIDTH, ICON_HEIGHT};
-    SDL_RenderTexture(renderer, direction_textures[ kbdPattern[ gamestate.player_pos % 4 ] ], NULL, &destRect);
+    SDL_RenderTexture(renderer, direction_textures[ kbd_pattern[ gamestate.player_pos % 4 ] ], NULL, &destRect);
 
     // Render score and high score panel
-    Update_Score(renderer);
+    UpdateScore(renderer);
 
     destRect.x = ICON_WIDTH + SIDE_PADDING*2;
     destRect.y = 0; 

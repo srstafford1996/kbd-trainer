@@ -1,9 +1,11 @@
+#include <stdbool.h>
+
 #include "game.h"
 #include "input.h"
 
 GameDirection prevInput = NEUTRAL;
 
-void Init_Game()
+void InitGame()
 {
     gamestate.player_pos = 0;
     gamestate.score = 0;
@@ -20,7 +22,7 @@ void Update(GameDirection input)
     // No update if input has not changed
     if (input == prevInput) return;
 
-    if (input == kbdPattern[ gamestate.player_pos % 4 ])
+    if (input == kbd_pattern[ gamestate.player_pos % 4 ])
     {
         // Correct input
         gamestate.score += 50;

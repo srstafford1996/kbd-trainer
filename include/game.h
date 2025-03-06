@@ -15,5 +15,5 @@ typedef struct{
 
 GameState gamestate;
 
-void Init_Game();
+void InitGame();
 void Update(GameDirection);

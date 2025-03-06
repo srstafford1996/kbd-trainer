@@ -1,15 +1,4 @@
-#ifndef INPUT_H
-#define INPUT_H
-
-#pragma comment(lib, "XInput.lib") 
-
-#include <Xinput.h>
-#include <stdbool.h>
-#include <stdio.h>
-
-extern bool isP1;
-
-XINPUT_STATE controllerState;
+#pragma once
 
 typedef enum {
     NEUTRAL = 0,
@@ -25,7 +14,7 @@ typedef enum {
     DISCONNECTED
 } GameDirection;
 
-static const GameDirection kbdPattern[4] = {BACK, NEUTRAL, BACK, DOWN_BACK};
+static const GameDirection kbd_pattern[4] = {BACK, NEUTRAL, BACK, DOWN_BACK};
 
 static const char *DirectionNames[11] = {
     [0] = "*",
@@ -41,7 +30,5 @@ static const char *DirectionNames[11] = {
     [10] = "DISCONNECTED"
 };
 
-GameDirection GetInput(DWORD userIndex);
-DWORD GetControllerIndex();
-
-#endif
+bool InitController();
+GameDirection GetInput();

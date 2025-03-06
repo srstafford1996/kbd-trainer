@@ -28,9 +28,8 @@ int main()
     SDL_Event ev;    
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
-    DWORD controllerIndex = GetControllerIndex();
     
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD) < 0)
     {
         printf("Error initializing SDL: %s\n", SDL_GetError());
         SDL_Delay(2000);
@@ -38,6 +37,9 @@ int main()
     }
     
     TTF_Init();
+
+    if(!InitController())
+        printf("No compatible controller detected. Using keyboard inputs (WASD)\n");
     
     SDL_CreateWindowAndRenderer("KBD Trainer", INITIAL_VIEW_WIDTH, INITIAL_VIEW_HEIGHT, 0, &window, &renderer);
     if (window == NULL)
@@ -46,12 +48,12 @@ int main()
         SDL_Delay(2000);
         return 1;
     }
-     
-    if (Init_Textures(renderer))
+    
+    if (InitTextures(renderer))
         printf("Texture load success!\n");
-        
-    Init_Game();
-
+    
+    InitGame();
+    
     while (isRunning)
     {
         prevFrame = frameStart;
@@ -64,7 +66,7 @@ int main()
         }
 
         
-        Update( GetInput(controllerIndex) );
+        Update( GetInput() );
         Render(renderer);
 
         // How long it took to execute the functions
@@ -74,7 +76,7 @@ int main()
         if (FRAME_DELAY > frameTime) 
             SDL_Delay(FRAME_DELAY - frameTime);
     }
-    
+   
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

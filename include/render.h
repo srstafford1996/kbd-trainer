@@ -31,5 +31,5 @@ static const char * _directionAssets[9] = {
 static const char * _playerAsset = "assets/ez1.png";
 static const char * _fontAsset = "assets/scorefont.ttf";
 
-bool Init_Textures(SDL_Renderer *);
+bool InitTextures(SDL_Renderer *);
 bool Render(SDL_Renderer *);
