@@ -38,7 +38,9 @@ int main()
     
     TTF_Init();
 
-    if(!InitController())
+    if(InitController())
+        printf("Controller found!\n");
+    else
         printf("No compatible controller detected. Using keyboard inputs (WASD)\n");
     
     SDL_CreateWindowAndRenderer("KBD Trainer", INITIAL_VIEW_WIDTH, INITIAL_VIEW_HEIGHT, 0, &window, &renderer);

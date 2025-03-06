@@ -16,7 +16,6 @@ bool InitController()
     int numOfPads = 0;
     SDL_JoystickID *padIds = SDL_GetGamepads(&numOfPads);
 
-    printf("Num of pads: %d", numOfPads);
     if (numOfPads == 0)
         return false;
     
