@@ -17,6 +17,7 @@ const int FPS = 60;
 int main()
 { 
     bool isRunning = true;
+    bool showModeSelect = true;
     
     // Frame timing
     const Uint64 FRAME_DELAY = 1000 / FPS;
@@ -51,10 +52,18 @@ int main()
         return 1;
     }
     
+    InitGame();
+    
     if (InitTextures(renderer))
         printf("Texture load success!\n");
     
-    InitGame();
+    if (!InitModeSelect(renderer))
+    {
+        printf("Error initializing mode select: %s", SDL_GetError());
+        return;
+    }
+    else 
+        printf("Menu loaded. Let's go\nPress LEFT/RIGHT to navigate, UP to confirm selection\n");
     
     while (isRunning)
     {
@@ -67,9 +76,24 @@ int main()
                 isRunning = false;
         }
 
-        
-        Update( GetInput() );
-        Render(renderer);
+        if (showModeSelect)
+        {
+            if (gamestate.start)
+            {
+                showModeSelect = false;
+                DestroyModeSelect();
+                printf("Starting mode: %s\n", gamestate.current_mode->mode_name);
+                continue;
+            }
+
+            UpdateModeSelect( GetInput() );
+            RenderModeSelect(renderer);
+        }
+        else 
+        {
+            Update( GetInput() );
+            Render(renderer);
+        }        
 
         // How long it took to execute the functions
         frameTime = SDL_GetTicks() - frameStart;
@@ -78,7 +102,9 @@ int main()
         if (FRAME_DELAY > frameTime) 
             SDL_Delay(FRAME_DELAY - frameTime);
     }
-   
+    
+    DestroyGame();
+
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
