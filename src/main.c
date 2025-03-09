@@ -12,15 +12,13 @@
 #include "input.h"
 #include "game.h"
 
-const int FPS = 60;
-
 int main()
 { 
     bool isRunning = true;
-    bool showModeSelect = true;
+    bool showGameView = false;
     
     // Frame timing
-    const Uint64 FRAME_DELAY = 1000 / FPS;
+    const Uint64 FRAME_DELAY = 16666666;
     Uint64 frameStart = 0;
     Uint64 frameTime = 0;    
     Uint64 prevFrame = 0;
@@ -57,50 +55,44 @@ int main()
     if (InitTextures(renderer))
         printf("Texture load success!\n");
     
-    if (!InitModeSelect(renderer))
+    if (!InitMenuTextures(renderer))
     {
         printf("Error initializing mode select: %s", SDL_GetError());
-        return;
+        return 1;
     }
     else 
-        printf("Menu loaded. Let's go\nPress LEFT/RIGHT to navigate, UP to confirm selection\n");
+        printf("Menu loaded. Let's go\nPress LEFT/RIGHT to navigate\nA to confirm selection | B/Start to return to menu\n");
+    
     
     while (isRunning)
     {
         prevFrame = frameStart;
-        frameStart = SDL_GetTicks();
-        
+        frameStart = SDL_GetTicksNS();
         while (SDL_PollEvent(&ev) != 0)
         {
             if (ev.type == SDL_EVENT_QUIT)
                 isRunning = false;
         }
 
-        if (showModeSelect)
+        // Switch to game view or menu view
+        if (showGameView != gamestate.run_game)
         {
-            if (gamestate.start)
-            {
-                showModeSelect = false;
-                DestroyModeSelect();
-                printf("Starting mode: %s\n", gamestate.current_mode->mode_name);
-                continue;
-            }
-
-            UpdateModeSelect( GetInput() );
-            RenderModeSelect(renderer);
+            showGameView = gamestate.run_game;
+            if(gamestate.run_game)
+                DestroyMenuTextures();
+            else
+                InitMenuTextures(renderer);
         }
-        else 
-        {
-            Update( GetInput() );
-            Render(renderer);
-        }        
+
+        Update( PollController() );
+        Render(renderer);
 
         // How long it took to execute the functions
-        frameTime = SDL_GetTicks() - frameStart;
+        frameTime = SDL_GetTicksNS() - frameStart;
 
         //Wait out the remainder
         if (FRAME_DELAY > frameTime) 
-            SDL_Delay(FRAME_DELAY - frameTime);
+            SDL_DelayPrecise(FRAME_DELAY - frameTime);
     }
     
     DestroyGame();

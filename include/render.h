@@ -32,9 +32,10 @@ static const char * _playerAsset = "assets/ez1.png";
 static const char * _fontAsset = "assets/scorefont.ttf";
 
 bool InitTextures(SDL_Renderer *);
-bool InitModeSelect(SDL_Renderer *);
+
+bool InitMenuTextures(SDL_Renderer *);
+void DestroyMenuTextures();
 
 void Render(SDL_Renderer *);
-void RenderModeSelect(SDL_Renderer *);
-
-void DestroyModeSelect();
+void _renderMenu(SDL_Renderer *);
+void _renderGame(SDL_Renderer *);

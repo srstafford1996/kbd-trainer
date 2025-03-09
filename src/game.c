@@ -5,10 +5,124 @@
 #include "game.h"
 #include "input.h"
 
-GameDirection prev_input = NEUTRAL;
+ControllerState prev_input = {0};
 int selected_mode = 0;
 
-void InitGameModes()
+void InitGame()
+{
+    _initGameModes();
+    
+    gamestate.player_pos = 0;
+    gamestate.score = 0;
+    gamestate.highscore = 0;
+    gamestate.failed = false;
+    gamestate.run_game = false;
+    gamestate.current_mode = gamemodes; 
+}
+
+void Update(ControllerState *cs)
+{
+    if (gamestate.run_game)
+        _updateGame(cs);
+    else
+        _updateMenu(cs);
+}
+
+void _updateMenu(ControllerState *cs)
+{
+    if (cs->back_pressed == prev_input.back_pressed
+        && cs->select_pressed == prev_input.select_pressed
+        && cs->direction == prev_input.direction)
+        return;
+
+    prev_input = *cs;
+    
+    // Start game
+    if (cs->select_pressed)
+    {
+        _startGame();
+        return;
+    }
+
+    if (cs->direction == FORWARD)
+    {
+        if (selected_mode == GAME_MODE_COUNT - 1)
+        selected_mode = 0;
+        else
+        selected_mode += 1;
+    }
+    else if (cs->direction == BACK)
+    {
+        if (selected_mode == 0)
+        selected_mode = GAME_MODE_COUNT - 1;
+        else
+        selected_mode -= 1;
+    }
+    
+    gamestate.current_mode = &gamemodes[selected_mode];
+}
+
+void _updateGame(ControllerState *cs)
+{
+    // Reset failed flag
+    if (gamestate.failed)
+        gamestate.failed = false;
+
+    if (cs->back_pressed)
+    {
+        gamestate.run_game = false;
+        return;
+    }
+    
+    // No update if input has not changed
+    if (cs->direction == prev_input.direction) return;
+    
+    if (cs->direction == gamestate.current_mode->pattern[ gamestate.player_pos % gamestate.current_mode->pattern_size ])
+    {
+        // Correct input
+        gamestate.score += 50;
+        if (gamestate.score > gamestate.highscore)
+        gamestate.highscore = gamestate.score;
+        
+        if (gamestate.player_pos == gamestate.current_mode->pattern_size - 1)
+        gamestate.player_pos = 0;
+        else
+        gamestate.player_pos += 1;
+        
+        prev_input.direction = cs->direction;
+    }
+    else
+    {
+        // Incorrect input
+        // return player to start for now
+        gamestate.player_pos = 0;
+        gamestate.score = 0;
+        
+        gamestate.failed = true;
+        gamestate.failed_input = cs->direction;
+        
+        prev_input.direction = cs->direction;
+    }
+}
+
+void _startGame()
+{
+    gamestate.player_pos = 0;
+    gamestate.score = 0;
+    gamestate.highscore = 0;
+    gamestate.failed = false;
+    gamestate.run_game = true;
+}
+
+void DestroyGame()
+{
+    for(int i = 0; i < GAME_MODE_COUNT; i++)
+    {
+        free(gamemodes[i].pattern);
+    }
+}
+
+void _initGameModes()
 {
     GameDirection *pattern;
 
@@ -62,88 +176,4 @@ void InitGameModes()
     gamemodes[3].pattern = pattern;
 
     printf("Gamemodes Initialized.\n");
-}
-
-void InitGame()
-{
-    InitGameModes();
-
-    gamestate.player_pos = 0;
-    gamestate.score = 0;
-    gamestate.highscore = 0;
-    gamestate.failed = false;
-    gamestate.start = false;
-    gamestate.current_mode = gamemodes; 
-}
-
-void UpdateModeSelect(GameDirection input)
-{
-    if (input == prev_input) return;
-    prev_input = input;
-
-    if (input == FORWARD)
-    {
-        if (selected_mode == GAME_MODE_COUNT - 1)
-            selected_mode = 0;
-        else
-            selected_mode += 1;
-    }
-    else if (input == BACK)
-    {
-        if (selected_mode == 0)
-            selected_mode = GAME_MODE_COUNT - 1;
-        else
-            selected_mode -= 1;
-    }
-    else if (input == UP)
-    {
-        gamestate.start = true;
-    }
-
-    gamestate.current_mode = &gamemodes[selected_mode];
-}
-
-void Update(GameDirection input)
-{
-    // Reset failed flag
-    if (gamestate.failed)
-        gamestate.failed = false;
-
-    // No update if input has not changed
-    if (input == prev_input) return;
-
-    if (input == gamestate.current_mode->pattern[ gamestate.player_pos % gamestate.current_mode->pattern_size ])
-    {
-        // Correct input
-        gamestate.score += 50;
-        if (gamestate.score > gamestate.highscore)
-            gamestate.highscore = gamestate.score;
-        
-        if (gamestate.player_pos == gamestate.current_mode->pattern_size - 1)
-            gamestate.player_pos = 0;
-        else
-            gamestate.player_pos += 1;
-
-        prev_input = input;
-    }
-    else
-    {
-        // Incorrect input
-        // return player to start for now
-        gamestate.player_pos = 0;
-        gamestate.score = 0;
-
-        gamestate.failed = true;
-        gamestate.failed_input = input;
-
-        prev_input = NEUTRAL;
-    }
-}
-
-void DestroyGame()
-{
-    for(int i = 0; i < GAME_MODE_COUNT; i++)
-    {
-        free(gamemodes[i].pattern);
-    }
 }

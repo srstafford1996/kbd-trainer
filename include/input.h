@@ -14,21 +14,12 @@ typedef enum {
     DISCONNECTED
 } GameDirection;
 
-static const GameDirection kbd_pattern[4] = {BACK, NEUTRAL, BACK, DOWN_BACK};
-
-static const char *DirectionNames[11] = {
-    [0] = "*",
-    [1] = "u",
-    [2] = "u/f",
-    [3] = "f",
-    [4] = "d/f",
-    [5] = "d",
-    [6] = "d/b",
-    [7] = "b",
-    [8] = "u/b",
-    [9] = "UNKNOWN",
-    [10] = "DISCONNECTED"
-};
+typedef struct {
+    GameDirection direction;
+    bool select_pressed;
+    bool back_pressed;
+} ControllerState;
 
 bool InitController();
-GameDirection GetInput();
+ControllerState *PollController();
+void _parseDirection();

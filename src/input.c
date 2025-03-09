@@ -6,7 +6,11 @@
 #include "input.h"
 
 SDL_Gamepad *gamepad = NULL;
-short dpad_state;
+
+ControllerState controller_state = {0};
+
+// 4 DIGIT BITMASK FOR DIRECTIONS
+short dpad_state = 0;
 
 
 bool InitController()
@@ -38,23 +42,24 @@ bool InitController()
     return false;
 }
 
-GameDirection GetInput()
+ControllerState *PollController()
 {
-    GameDirection d;
-    
-    
+
     // Just gonna group all these into a bitmask following the XINPUT standard
     // so i dont have to rewrite the XINPUT implementation
     // it's 10pm on a weeknight
-    
-    // 0001 is UP, 0010 is DOWN, 0100 is LEFT, 1000 is RIGHT
     if (gamepad != NULL)
     {
+        // 0001 is UP, 0010 is DOWN, 0100 is LEFT, 1000 is RIGHT
         SDL_UpdateGamepads();
         dpad_state = 1 * SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_DPAD_UP);
         dpad_state |= 2 * SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_DPAD_DOWN);
         dpad_state |= 4 * SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_DPAD_LEFT);
         dpad_state |= 8 * SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_DPAD_RIGHT);
+
+        // For Buttons...
+        controller_state.select_pressed = SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_SOUTH);
+        controller_state.back_pressed = SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_EAST) | SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_START);
     }
     else
     {
@@ -63,62 +68,70 @@ GameDirection GetInput()
         // array is indexed by enumeration
         SDL_PumpEvents();
         const bool *keys = SDL_GetKeyboardState(NULL);
-
+    
         dpad_state = 1 * keys[SDL_SCANCODE_W];
         dpad_state |= 2 * keys[SDL_SCANCODE_S];
         dpad_state |= 4 * keys[SDL_SCANCODE_A];
         dpad_state |= 8 * keys[SDL_SCANCODE_D];
-    }
 
-    switch( dpad_state )
+        controller_state.select_pressed = keys[SDL_SCANCODE_SPACE];
+        controller_state.back_pressed = keys[SDL_SCANCODE_ESCAPE];
+    }
+    
+    _parseDirection();
+
+    return &controller_state;
+}
+
+void _parseDirection()
+{
+    switch( dpad_state & 0xF )
     {
         // 0000
         case 0x0:
-            d = NEUTRAL;
+            controller_state.direction = NEUTRAL;
             break;
         // 0001
         case 0x1:
-            d = UP;
+            controller_state.direction = UP;
             break;
-
+    
         // 1001
         case 0x9:
-            d = UP_FORWARD; 
+            controller_state.direction = UP_FORWARD; 
             break;
         
         // 0101
         case 0x5:
-            d = UP_BACK;
+            controller_state.direction = UP_BACK;
             break;
         
         // 0100
         case 0x4:
-            d = BACK;
+            controller_state.direction = BACK;
             break;
         
         // 1000
         case 0x8:
-            d = FORWARD;
+            controller_state.direction = FORWARD;
             break;
         
         // 0010
         case 0x2:
-            d = DOWN;
+            controller_state.direction = DOWN;
             break;
         
         // 1010
         case 0xA:
-            d = DOWN_FORWARD;
+            controller_state.direction = DOWN_FORWARD;
             break;
         
         // 0110
         case 0x6:
-            d = DOWN_BACK;
+            controller_state.direction = DOWN_BACK;
             break;
         
         default:
-            d = UNKNOWN; 
+            controller_state.direction = UNKNOWN; 
     }
-
-    return d;
 }

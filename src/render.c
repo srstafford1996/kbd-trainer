@@ -95,7 +95,58 @@ void UpdateScore(SDL_Renderer *renderer)
 }
 
 
-void Render(SDL_Renderer *renderer) 
+
+// Initialize the view for mode select
+bool InitMenuTextures(SDL_Renderer *renderer)
+{
+    char text[32];
+    
+    SDL_Color textColor = {255, 255, 255};
+    
+    for (int i = 0; i < GAME_MODE_COUNT; i++)
+    {
+        snprintf(text, 32, "%s", gamemodes[i].mode_name);
+        SDL_Surface *surface = TTF_RenderText_Solid(score_font, text, strlen(text), textColor);
+        
+        menu_textures[i] = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_DestroySurface(surface);
+        
+        if (menu_textures[i] == NULL )
+        {
+            printf("Error initializing mode select view: %s", SDL_GetError());
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+// Destroy mode select textures from memory after game starts
+void DestroyMenuTextures()
+{
+    for (int i = 0; i < GAME_MODE_COUNT; i++)
+    SDL_DestroyTexture(menu_textures[i]);
+}
+
+void Render(SDL_Renderer *renderer)
+{
+    if (gamestate.run_game) 
+        _renderGame(renderer);
+    else
+        _renderMenu(renderer);
+}
+
+void _renderMenu(SDL_Renderer *renderer)
+{
+    SDL_RenderClear(renderer);
+    
+    SDL_FRect destRect = {SIDE_PADDING, ICON_HEIGHT / 2, INITIAL_VIEW_WIDTH - (SIDE_PADDING * 2), ICON_HEIGHT};
+    SDL_RenderTexture(renderer, menu_textures[selected_mode], NULL, &destRect);
+    
+    SDL_RenderPresent(renderer);
+}
+
+void _renderGame(SDL_Renderer *renderer) 
 {
     SDL_RenderClear(renderer);
     
@@ -117,46 +168,4 @@ void Render(SDL_Renderer *renderer)
     SDL_RenderTexture(renderer, highscore_texture, NULL, &destRect);
     
     SDL_RenderPresent(renderer);
-}
-
-// Initialize the view for mode select
-bool InitModeSelect(SDL_Renderer *renderer)
-{
-    char text[32];
-    
-    SDL_Color textColor = {255, 255, 255};
-
-    for (int i = 0; i < GAME_MODE_COUNT; i++)
-    {
-        snprintf(text, 32, "%s", gamemodes[i].mode_name);
-        SDL_Surface *surface = TTF_RenderText_Solid(score_font, text, strlen(text), textColor);
-
-        menu_textures[i] = SDL_CreateTextureFromSurface(renderer, surface);
-        SDL_DestroySurface(surface);
-
-        if (menu_textures[i] == NULL )
-        {
-            printf("Error initializing mode select view: %s", SDL_GetError());
-            return false;
-        }
-    }
-
-    return true;
-}
-
-void RenderModeSelect(SDL_Renderer *renderer)
-{
-    SDL_RenderClear(renderer);
-
-    SDL_FRect destRect = {SIDE_PADDING, ICON_HEIGHT / 2, INITIAL_VIEW_WIDTH - (SIDE_PADDING * 2), ICON_HEIGHT};
-    SDL_RenderTexture(renderer, menu_textures[selected_mode], NULL, &destRect);
-
-    SDL_RenderPresent(renderer);
-}
-
-// Destroy mode select textures from memory after game starts
-void DestroyModeSelect()
-{
-    for (int i = 0; i < GAME_MODE_COUNT; i++)
-        SDL_DestroyTexture(menu_textures[i]);
 }

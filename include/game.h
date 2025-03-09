@@ -27,13 +27,18 @@ typedef struct{
     GameDirection failed_input;
     
     GameMode *current_mode;
-    bool start;
+    bool run_game;
 } GameState;
 
 GameState gamestate;
 
 void InitGame();
 void DestroyGame();
+void _startGame();
 
-void Update(GameDirection);
-void UpdateModeSelect(GameDirection);
+void Update(ControllerState *);
+
+void _updateMenu(ControllerState *);
+void _updateGame(ControllerState *);
+
+void _initGameModes();
