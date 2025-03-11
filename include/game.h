@@ -15,6 +15,11 @@ typedef struct {
 extern int selected_mode;
 GameMode gamemodes[GAME_MODE_COUNT];
 
+typedef enum {
+    NONE = 0,
+    SUCCESS,
+    FAIL
+} InputAccuracy;
 
 typedef struct{
     // current position in the pattern
@@ -23,8 +28,10 @@ typedef struct{
     uint64_t score;
     uint64_t highscore;
     
-    bool failed;
-    GameDirection failed_input;
+    GameDirection curr_input;
+
+    InputAccuracy last_input_acc;
+    GameDirection last_input;
     
     GameMode *current_mode;
     bool run_game;
