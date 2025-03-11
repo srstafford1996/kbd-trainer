@@ -59,7 +59,7 @@ ControllerState *PollController()
 
         // For Buttons...
         controller_state.select_pressed = SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_SOUTH);
-        controller_state.back_pressed = SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_EAST) | SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_START);
+        controller_state.back_pressed = SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_EAST) || SDL_GetGamepadButton(gamepad, SDL_GAMEPAD_BUTTON_START);
     }
     else
     {
@@ -69,12 +69,22 @@ ControllerState *PollController()
         SDL_PumpEvents();
         const bool *keys = SDL_GetKeyboardState(NULL);
     
-        dpad_state = 1 * keys[SDL_SCANCODE_W];
-        dpad_state |= 2 * keys[SDL_SCANCODE_S];
-        dpad_state |= 4 * keys[SDL_SCANCODE_A];
-        dpad_state |= 8 * keys[SDL_SCANCODE_D];
+        dpad_state = 1 * (keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_UP]);
+        dpad_state |= 2 * (keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_DOWN]);
+        dpad_state |= 4 * (keys[SDL_SCANCODE_A] || keys[SDL_SCANCODE_LEFT]);
+        dpad_state |= 8 * (keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT]);
+        
+        // SOCD Cleaning
+        
+        // If 0011 then set the last 2 bits to 00
+        if ((dpad_state & 3) == 3)
+        dpad_state &= 12;
+        
+        // If 1100 then set the first 2 bits to 00
+        if ((dpad_state & 12) == 12)
+            dpad_state &= 3;
 
-        controller_state.select_pressed = keys[SDL_SCANCODE_SPACE];
+        controller_state.select_pressed = keys[SDL_SCANCODE_SPACE] || keys[SDL_SCANCODE_RETURN] || keys[SDL_SCANCODE_RETURN2];
         controller_state.back_pressed = keys[SDL_SCANCODE_ESCAPE];
     }
     

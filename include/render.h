@@ -20,11 +20,6 @@
 #define INITIAL_VIEW_WIDTH (ICON_WIDTH + SCORE_COUNTER_WIDTH + (SIDE_PADDING * 3))
 #define INITIAL_VIEW_HEIGHT (ICON_HEIGHT * 2 + VERT_PADDING * 2)
 
-/*
-#define INITIAL_VIEW_WIDTH ICON_WIDTH + SCORE_COUNTER_WIDTH + (SIDE_PADDING * 3)
-#define INITIAL_VIEW_HEIGHT ICON_HEIGHT * 2 + ACC_DISPLAY_HEIGHT + ACC_DISPLAY_VERT_PADDING
-*/
-
 static const char * _directionAssets[9] = {
     [0] = "assets/n.bmp",
     [1] = "assets/u.bmp",
